@@ -1,2 +1,2 @@
 # Muon-MCEq
- Study Muon in Atomosphere  
+ Study Muon in Atmosphere  
