@@ -8,6 +8,8 @@ G = np.load('G_2015.npy')
 # shape of T and G is (24,37,161,201) (day, pressure_level ,lat, lon)
 # T in K, G (gravitational potential energy for unit mass) in J/kg
 # lat and lon range from S0-N40,E90-E140
+LON_MIN, LON_MAX = 113.9, 114.1
+LAT_MIN, LAT_MAX = 0, 22
 
 pressure_levels = [1000. ,975., 950., 925. , 900. , 875. , 850. , 825. , 800.,  775. , 750. , 700.,
   650. , 600.,  550. , 500. , 450. , 400.,  350. , 300. , 250. , 225. , 200. , 175. ,
@@ -36,12 +38,13 @@ def Xv2X(Xv,T,theta):
 # change lon,lat to index of T and G
 # lon,lat in degree, return index of row, col
 def lon_lat2index(lon, lat):  
-    #assert 90 <= lon < 140 and 0 < lat <= 40
-    return ( (int)(((40-lat)*161)//40) , (int)(((lon-90)*201)//50) )
+    assert LON_MIN <= lon <= LON_MAX and LAT_MIN <= lat <= LAT_MAX, 'lon,lat out of range'
+    return ( (int)(((LAT_MAX-lat)*(T.shape[2]-1))//(LAT_MAX-LAT_MIN)) , (int)(((lon-LON_MIN)*(T.shape[3]-1))//(LON_MAX-LON_MIN)) )
+
 
 # from (lon0, lat0, last_press_level) climb to (lon, lat) with angle theta, phi
 # return oblique distance (in meters), lon, lat
-def obliqueClimb(day,lon0, lat0, last_press_level, cumulative_l,theta, phi, max_steps=100, dt_init=100, err=1):
+def obliqueClimb(day,lon0, lat0, last_press_level, cumulative_l,theta, phi, max_steps=1000, dt_init=100, err=1):
     assert 0 <= last_press_level < T.shape[1] and 0 <= theta <= 90 and 0 <= phi <= 360
 
     def delta_lon_per_m(_lat):
@@ -147,4 +150,5 @@ plt.plot(Xs,Ys)
 plt.xlabel('X (g/cm^2)')
 plt.ylabel('Density (g/cm^3)')
 plt.title('Density vs. X for lat=22, lon=114, theta=45, phi=0, 20150101-6:00')
+
 plt.show()
